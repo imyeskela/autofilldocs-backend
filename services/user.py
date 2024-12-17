@@ -2,7 +2,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_
 from sqlalchemy.orm import selectinload
 from fastapi import HTTPException
-
 from db.models import User
 from schemes.auth import UserSignUp
 from schemes.tag import TagCreate
@@ -14,7 +13,6 @@ async def get_user_by_telegram_id(telegram_id: int, session: AsyncSession) -> Us
     result = await session.execute(query)
     user = result.scalar_one_or_none()
     return user
-
 
 async def check_existence(telegram_id: int, session: AsyncSession):
     """Сhecks if the user is in the database"""

@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi_jwt_auth import AuthJWT
 
 from schemes.auth import JWTResponse, UserSignUp, UserLogin
 from db import get_async_session
+from services.auth import return_jwt
 from services.user import check_existence, create_new_user, get_user_by_telegram_id
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -11,23 +13,20 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 @router.post("", response_model=JWTResponse)
 async def signup(
         user_data: UserSignUp,
-        session: AsyncSession = Depends(get_async_session)
+        session: AsyncSession = Depends(get_async_session),
+        authorize: AuthJWT = Depends(),
 ):
     await check_existence(user_data.telegram_id, session)
     user = await create_new_user(user_data, session)
-    return {
-        "status": "success",
-        "data": {
-            "id": user.id,
-            "token": "1123"
-        },
-        "details": None
-    }
+
+    return return_jwt(user, authorize)
+
 
 @router.post("/login", response_model=JWTResponse)
 async def login(
         user_data: UserLogin,
-        session: AsyncSession = Depends(get_async_session)
+        session: AsyncSession = Depends(get_async_session),
+        authorize: AuthJWT = Depends(),
 ):
 
     user = await get_user_by_telegram_id(user_data.telegram_id, session)
@@ -41,11 +40,4 @@ async def login(
             },
         )
 
-    return {
-        "status": "success",
-        "data": {
-            "id": user.id,
-            "token": "1123"
-        },
-        "details": None
-    }
+    return return_jwt(user, authorize)
