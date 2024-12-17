@@ -24,7 +24,7 @@ class User(Base):
     __tablename__ = "user"
     id = Column(Integer, primary_key=True)
     telegram_id = Column(BigInteger, nullable=False, unique=True)
-    username = Column(String, nullable=False, unique=True)
+    username = Column(String, nullable=True, unique=True)
 
     tags = relationship("Tag", back_populates="user", lazy="select")
     files = relationship("File", back_populates="user", lazy="select")
