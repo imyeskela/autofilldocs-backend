@@ -14,4 +14,7 @@ class JWTResponse(BaseModel):
 
 class UserSignUp(BaseModel):
     telegram_id: int
-    username: str | None = None
+
+
+class UserLogin(BaseModel):
+    telegram_id: int

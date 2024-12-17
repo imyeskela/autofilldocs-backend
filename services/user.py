@@ -9,19 +9,16 @@ from schemes.tag import TagCreate
 from services.tag import create_new_tag
 
 
-async def check_existence(username, telegram_id, session: AsyncSession):
-    """Сhecks if the user is in the database"""
-    filter_args = [
-        (User.username == username),
-        (User.telegram_id == telegram_id),
-    ]
-
-    query = select(User).options(
-            selectinload(User.files),
-            selectinload(User.tags),
-        ).where(or_(*filter_args))
+async def get_user_by_telegram_id(telegram_id: int, session: AsyncSession) -> User:
+    query = select(User).where(User.telegram_id == telegram_id)
     result = await session.execute(query)
-    user = result.first()
+    user = result.scalar_one_or_none()
+    return user
+
+
+async def check_existence(telegram_id: int, session: AsyncSession):
+    """Сhecks if the user is in the database"""
+    user = await get_user_by_telegram_id(telegram_id, session)
     if user:
         raise HTTPException(
             status_code=400,
@@ -40,3 +37,5 @@ async def create_new_user(user_data: UserSignUp, session: AsyncSession) -> User:
     await session.refresh(user)
     await create_new_tag(TagCreate(name="Общая", user_id=user.id), session)
     return user
+
+
