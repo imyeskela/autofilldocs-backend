@@ -11,10 +11,11 @@ from fastapi_pagination.ext.sqlalchemy import paginate
 from db import get_async_session
 from db.models import File
 from schemes.file import FilesResponse, FileResponse, FileCreate
-from services.file import get_files, create_file
-from services.tag import get_user_tags
+from services.file import get_files, create_file, parse_file
+from services.tag import get_user_tags, get_user_default_tag
 
 router = APIRouter(prefix="/files", tags=["File"])
+
 
 @router.get("", response_model=FilesResponse)
 async def get_users_files(
@@ -60,16 +61,18 @@ async def get_users_files(
 
 @router.post("/upload", response_model=FileResponse)
 async def upload_file(
-        # file: UploadFile,
-        # msg_id: int,
-        data: FileCreate,
+        file: UploadFile,
+        msg_id: int,
         session: AsyncSession = Depends(get_async_session),
         authorize: AuthJWT = Depends(),
 ):
     authorize.jwt_required()
     user_id = authorize.get_jwt_subject()
-    # content = await file.read()
-    # fileio = BytesIO(content)
+    content = await file.read()
+    fileio = BytesIO(content)
+    parsed_data = await parse_file(fileio)
+    default_tag = await get_user_default_tag(user_id, session)
+    data = FileCreate(**parsed_data, message_id=msg_id, user_id=user_id, tag_id=default_tag.id)
     file = await create_file(data, session)
 
     return {
