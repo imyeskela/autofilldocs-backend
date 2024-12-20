@@ -1,11 +1,11 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_
+from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from fastapi import HTTPException
 from db.models import User
 from schemes.auth import UserSignUp
 from schemes.tag import TagCreate
-from services.tag import create_new_tag
+from services.tag import create_tag
 
 
 async def get_user_by_telegram_id(telegram_id: int, session: AsyncSession) -> User:
@@ -33,7 +33,7 @@ async def create_new_user(user_data: UserSignUp, session: AsyncSession) -> User:
     session.add(user)
     await session.commit()
     await session.refresh(user)
-    await create_new_tag(TagCreate(name="Общая", user_id=user.id), session)
+    await create_tag(TagCreate(name="Общая", user_id=user.id), session)
     return user
 
 

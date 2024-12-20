@@ -7,7 +7,7 @@ from sqlalchemy import (
     TIMESTAMP,
     ForeignKey,
     Boolean,
-    Index, Float, Enum, LargeBinary,
+    Index, Float, Enum, LargeBinary, UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from passlib.context import CryptContext
@@ -32,7 +32,7 @@ class User(Base):
 class File(Base):
     __tablename__ = "file"
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
+    filename = Column(String, nullable=False)
     message_id = Column(Integer, nullable=False)
     vars = Column(JSONB, nullable=True)
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
@@ -41,6 +41,9 @@ class File(Base):
     user = relationship("User", back_populates="files", lazy="select")
     tag = relationship("Tag", back_populates="files", lazy="select")
 
+    __table_args__ = (
+        UniqueConstraint('filename', 'user_id', name='uix_filename_user'),
+    )
 
 class Tag(Base):
     __tablename__ = "tag"
@@ -50,3 +53,7 @@ class Tag(Base):
 
     user = relationship("User", back_populates="tags", lazy="select")
     files = relationship("File", back_populates="tag", lazy="select")
+
+    __table_args__ = (
+        UniqueConstraint('name', 'user_id', name='uix_name_user'),
+    )

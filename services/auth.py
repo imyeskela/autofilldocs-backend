@@ -27,6 +27,6 @@ def return_jwt(user: User, authorize: AuthJWT, refresh_token: str | None = None)
                 "token": access_token,
                 "refresh": refresh_token
             },
-            "details": None
+            "details": {"msg": "User successfully authorized."}
         }
     )
