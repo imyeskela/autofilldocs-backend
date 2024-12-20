@@ -8,7 +8,7 @@ from starlette.responses import JSONResponse
 from schemes import Settings
 
 from api.auth import router as router_auth
-from api.file import router as router_file
+from api.template import router as router_template
 
 app = FastAPI(title="Auto Fill Docs Api")
 
@@ -21,7 +21,7 @@ app.add_middleware(
 )
 
 app.include_router(router_auth)
-app.include_router(router_file)
+app.include_router(router_template)
 
 @AuthJWT.load_config
 def get_config():

@@ -2,13 +2,13 @@ from pydantic import BaseModel
 from typing import List
 from fastapi_pagination import Page
 
-class FileReturn(BaseModel):
+class TemplateReturn(BaseModel):
     id: int
     filename: str
     tag_id: int
 
 
-class FileRead(BaseModel):
+class TemplateRead(BaseModel):
     id: int
     filename: str
     message_id: int
@@ -16,24 +16,19 @@ class FileRead(BaseModel):
     tag_id: int
 
 
-class FileResponse(BaseModel):
+class TemplateResponse(BaseModel):
     status: str
-    data: FileRead
+    data: TemplateRead
     details: dict
 
 
-class FilesResponse(BaseModel):
+class TemplatesResponse(BaseModel):
     status: str
-    data: Page[FileReturn]
+    data: Page[TemplateReturn]
     details: dict
 
 
-class FilesQuery(BaseModel):
-    tag_ids: List[int]
-    search: str
-
-
-class FileCreate(BaseModel):
+class TemplateCreate(BaseModel):
     filename: str
     message_id: int
     vars: dict
