@@ -32,8 +32,8 @@ class User(Base):
     files = relationship("File", back_populates="user", lazy="select")
 
 
-class File(Base):
-    __tablename__ = "file"
+class Template(Base):
+    __tablename__ = "template"
     id = Column(Integer, primary_key=True)
     filename = Column(String, nullable=False)
     message_id = Column(Integer, nullable=False)
@@ -43,9 +43,10 @@ class File(Base):
 
     user = relationship("User", back_populates="files", lazy="select")
     tag = relationship("Tag", back_populates="files", lazy="select")
+    files = relationship("File", back_populates="template", lazy="select")
 
     __table_args__ = (
-        UniqueConstraint('filename', 'user_id', name='uix_filename_user'),
+        UniqueConstraint('filename', 'user_id', name='uix_template_user'),
     )
 
     @staticmethod
@@ -55,7 +56,7 @@ class File(Base):
         else:
             base_name, extension = base_filename, ''  # Если расширения нет, просто берем весь filename как base_name
         # Запрос на подсчет файлов с таким же именем у конкретного пользователя
-        query = select(func.count()).where(File.filename == base_filename, File.user_id == user_id)
+        query = select(func.count()).where(Template.filename == base_filename, Template.user_id == user_id)
         result = await session.execute(
             query
         )
@@ -71,7 +72,7 @@ class File(Base):
                 else:
                     new_filename = f"{base_name}_{counter}"
 
-                query = select(func.count()).where(File.filename == new_filename, File.user_id == user_id)
+                query = select(func.count()).where(Template.filename == new_filename, Template.user_id == user_id)
                 result = await session.execute(
                     query
                 )
@@ -82,6 +83,16 @@ class File(Base):
         return base_filename  # Если имя уникально, возвращаем исходное имя
 
 
+class File(Base):
+    __tablename__ = "file"
+
+    id = Column(Integer, primary_key=True)
+    filename = Column(String, nullable=False)
+    template_id = Column(Integer, ForeignKey("template.id"), nullable=False)
+
+    template = relationship("Template", back_populates="files", lazy="select")
+
+
 class Tag(Base):
     __tablename__ = "tag"
     id = Column(Integer, primary_key=True)
@@ -89,6 +100,7 @@ class Tag(Base):
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
 
     user = relationship("User", back_populates="tags", lazy="select")
+    templates = relationship("Template", back_populates="tag", lazy="select")
     files = relationship("File", back_populates="tag", lazy="select")
 
     __table_args__ = (
