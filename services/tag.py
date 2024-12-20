@@ -18,3 +18,10 @@ async def get_user_tags(user_id: int, session: AsyncSession) ->  Sequence[Tag]:
     result = await session.execute(query)
     tags = result.scalars().all()
     return tags
+
+
+async def get_user_default_tag(user_id: int, session: AsyncSession) -> Tag:
+    query = select(Tag).where(Tag.user_id == user_id).where(Tag.name == "Общая").order_by(Tag.id.desc())
+    result = await session.execute(query)
+    tag = result.scalar_one_or_none()
+    return tag
