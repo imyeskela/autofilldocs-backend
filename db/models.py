@@ -88,6 +88,7 @@ class File(Base):
 
     id = Column(Integer, primary_key=True)
     filename = Column(String, nullable=False)
+    vars = Column(JSONB, nullable=False)
     template_id = Column(Integer, ForeignKey("template.id"), nullable=False)
 
     template = relationship("Template", back_populates="files", lazy="select")
